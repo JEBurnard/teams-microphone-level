@@ -1,11 +1,12 @@
-﻿using NAudio.Wave;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
 
 namespace TeamsMicrophoneLevel
 {
     internal class LevelStreamer : IDisposable
     {
         // device currently being monitored
-        private string? _deviceName = null;
+        private string? _deviceId = null;
 
         // device monitor delegate
         private WaveInEvent? _device = null;
@@ -26,18 +27,18 @@ namespace TeamsMicrophoneLevel
         }
 
 
-        public string? TeamsDeviceName
+        public string? TeamsDeviceId
         {
-            get { return _deviceName; }
+            get { return _deviceId; }
             set 
             {
                 var changed = false;
                 lock (_lock)
                 {
-                    if (!string.Equals(_deviceName, value))
+                    if (!string.Equals(_deviceId, value))
                     {
                         changed = true;
-                        _deviceName = value;
+                        _deviceId = value;
                     }
                 }
                 if (changed)
@@ -64,25 +65,7 @@ namespace TeamsMicrophoneLevel
         public void Start()
         {
             Stop();
-
-            var deviceNumber = GetTeamsDeviceNumber();
-            if (deviceNumber == null)
-            {
-                return;
-            }
-
-            // todo: pick better values here
-            // eg 44.1khz, 100ms buffer?
-
-            // set up a 1khz, 16 bit int, mono PCM (amplitude) stream
-            _device = new WaveInEvent
-            {
-                DeviceNumber = deviceNumber.Value,
-                WaveFormat = new WaveFormat(rate: 1000, bits: 16, channels: 1),
-                BufferMilliseconds = 10,
-            };
-            _device.DataAvailable += Device_DataAvailable;
-            _device.StartRecording();
+            OpenDevice();
         }
 
         public void Stop()
@@ -94,34 +77,32 @@ namespace TeamsMicrophoneLevel
             }
         }
 
-        private int? GetTeamsDeviceNumber()
+        private void OpenDevice()
         {
             lock (_lock)
             { 
                 // need to pick a device first
-                if (_deviceName == null)
+                if (_deviceId == null)
                 {
-                    return null;
+                    return;
                 }
 
-                // iterate over wave devices to find the match
-                int waveInDevices = WaveIn.DeviceCount;
-                for (int waveInDevice = 0; waveInDevice < waveInDevices; waveInDevice++)
-                {
-                    // wave device name is shorter than the multimedia device name
-                    // eg MM FriendlyName = "SteelSeries Sonar - Microphone (SteelSeries Sonar Virtual Audio Device)"
-                    //   wave ProductName = "SteelSeries Sonar - Microphone " - limited to 32 chars?
-                    var deviceInfo = WaveIn.GetCapabilities(waveInDevice);
-                    if (_deviceName.StartsWith(deviceInfo.ProductName))
-                    {
-                        // todo: does not match
-                        // "SteelSeries Sonar Virtual Audio Device" vs "SteelSeries Sonar - Microphone " or "Microphone (7- Arctis 7+)"
-                        return waveInDevice;
-                    }
-                }
+                // find the mm device by id
+                var deviceEnumerator = new MMDeviceEnumerator();
+                var mmDevice = deviceEnumerator.GetDevice(_deviceId);
 
-                // not found 
-                return null;
+                // open wave device (defaults to 100ms buffer)
+                var _device = new WasapiCapture(mmDevice)
+                {
+                    // todo: pick better values here
+
+                    // set up a 1khz, 16 bit int, mono PCM (amplitude) stream
+                    WaveFormat = new WaveFormat(rate: 1000, bits: 16, channels: 1)
+                };
+
+                // start streaming
+                _device.DataAvailable += Device_DataAvailable;
+                _device.StartRecording();
             }
         }
 

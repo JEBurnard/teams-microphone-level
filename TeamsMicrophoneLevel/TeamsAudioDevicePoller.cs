@@ -4,7 +4,7 @@ namespace TeamsMicrophoneLevel
 {
     internal class TeamsAudioDevicePoller
     {
-        private string? _currentDevice = null;
+        private string? _currentDeviceId = null;
         private object _currentDeviceLock = new object();
 
 
@@ -13,14 +13,14 @@ namespace TeamsMicrophoneLevel
         /// </summary>
         public Task Poll()
         {
-            string? deviceName = null;
+            string? deviceId = null;
 
             // iterate capture (microphone) devices
             var deviceEnumerator = new MMDeviceEnumerator();
             var devices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
             foreach (var device in devices)
             {
-                if (deviceName != null)
+                if (deviceId != null)
                 {
                     // exit early if the devices used by teams has been already found
                     break;
@@ -40,7 +40,7 @@ namespace TeamsMicrophoneLevel
                     if (session.GetSessionIdentifier.Contains("Teams.exe"))
                     {
                         // this session is for the teams process, save and exit early
-                        deviceName = device.DeviceFriendlyName;
+                        deviceId = device.ID;
                         break;
                     }
                 }
@@ -49,23 +49,23 @@ namespace TeamsMicrophoneLevel
             // update current device
             lock(_currentDeviceLock)
             {
-                _currentDevice = deviceName;
+                _currentDeviceId = deviceId;
             }
 
             return Task.CompletedTask;
         }
 
         /// <summary>
-        /// Get the microphone device name that is in use by the teams process.
+        /// Get the MMDevice ID of the microphone that is in use by the teams process.
         /// Null if none found.
         /// </summary>
-        public string? CurrentDevice
+        public string? CurrentDeviceId
         {
             get
             {
                 lock (_currentDeviceLock)
                 {
-                    return _currentDevice;
+                    return _currentDeviceId;
                 }
             }
         }

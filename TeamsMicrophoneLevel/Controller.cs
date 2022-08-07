@@ -121,7 +121,7 @@ namespace TeamsMicrophoneLevel
                 }
 
                 // update device beming monitored
-                _levelStreamer.TeamsDeviceName = _audioDevicePoller.CurrentDevice;
+                _levelStreamer.TeamsDeviceId = _audioDevicePoller.CurrentDeviceId;
 
                 // notify callbacks
                 lock (_lock)
