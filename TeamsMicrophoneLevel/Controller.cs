@@ -17,8 +17,9 @@ namespace TeamsMicrophoneLevel
         private int _debugPort = 8315;
 
         // callbacks
+        private Action<string?>? _onDeviceChanged;
         private Action<bool>? _onIsCallActiveChanged;
-        private Action<bool>? _onIsMicrophoneOnChanged;
+        private Action<bool>? _onIsMicrophoneChanged;
 
         // polling control
         private readonly object _lock = new object();
@@ -53,6 +54,17 @@ namespace TeamsMicrophoneLevel
             }
         }
 
+        public Action<string?>? OnDeviceChanged
+        {
+            set
+            {
+                lock (_lock)
+                {
+                    _onDeviceChanged = value;
+                }
+            }
+        }
+
         public Action<double>? OnLevelAvaliable
         {
             set
@@ -75,13 +87,13 @@ namespace TeamsMicrophoneLevel
             }
         }
 
-        public Action<bool>? OnIsMicrophoneOnChanged
+        public Action<bool>? OnIsMicrophoneChanged
         {
             set
             {
                 lock (_lock)
                 {
-                    _onIsMicrophoneOnChanged = value;
+                    _onIsMicrophoneChanged = value;
                 }
             }
         }
@@ -106,6 +118,7 @@ namespace TeamsMicrophoneLevel
 
         private void Run()
         {
+            string? oldDeviceName = null;
             bool wasInCall = false;
             bool wasMuted = false;
 
@@ -126,6 +139,16 @@ namespace TeamsMicrophoneLevel
                 // notify callbacks
                 lock (_lock)
                 {
+                    var deviceName = _audioDevicePoller.CurrentDeviceName;
+                    if (!string.Equals(oldDeviceName, deviceName, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        oldDeviceName = deviceName;
+                        if (_onDeviceChanged != null)
+                        {
+                            _onDeviceChanged.Invoke(deviceName);
+                        }
+                    }
+
                     var isInCall = _mutePoller.IsCallActive;
                     if (isInCall != wasInCall)
                     {
@@ -140,9 +163,9 @@ namespace TeamsMicrophoneLevel
                     if (isMuted != wasMuted)
                     {
                         wasMuted = isMuted;
-                        if (_onIsMicrophoneOnChanged != null)
+                        if (_onIsMicrophoneChanged != null)
                         {
-                            _onIsMicrophoneOnChanged.Invoke(isMuted);
+                            _onIsMicrophoneChanged.Invoke(isMuted);
                         }
                     }
                 }

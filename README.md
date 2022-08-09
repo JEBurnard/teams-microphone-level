@@ -22,9 +22,9 @@ to find the state of the mute button.
 
 ## Sources
 
-System tray based on FontAwesome volume-high icon, CC BY 4.0 License:
+System tray based on FontAwesome volume-high icon, CC BY 4.0 license:
 https://fontawesome.com/icons/volume-high?s=solid
 
-swharden csharp-data-visualization example project:
+swharden csharp-data-visualization example project, MIT license:
 https://github.com/swharden/Csharp-Data-Visualization/tree/main/projects/maui-audio-monitor
 

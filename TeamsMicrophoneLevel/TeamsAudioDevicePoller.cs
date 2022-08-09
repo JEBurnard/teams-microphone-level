@@ -5,6 +5,7 @@ namespace TeamsMicrophoneLevel
     internal class TeamsAudioDevicePoller
     {
         private string? _currentDeviceId = null;
+        private string? _currentDeviceName = null;
         private object _currentDeviceLock = new object();
 
 
@@ -14,6 +15,7 @@ namespace TeamsMicrophoneLevel
         public Task Poll()
         {
             string? deviceId = null;
+            string? deviceName = null;
 
             // iterate capture (microphone) devices
             var deviceEnumerator = new MMDeviceEnumerator();
@@ -41,6 +43,7 @@ namespace TeamsMicrophoneLevel
                     {
                         // this session is for the teams process, save and exit early
                         deviceId = device.ID;
+                        deviceName = device.DeviceFriendlyName;
                         break;
                     }
                 }
@@ -50,6 +53,7 @@ namespace TeamsMicrophoneLevel
             lock(_currentDeviceLock)
             {
                 _currentDeviceId = deviceId;
+                _currentDeviceName = deviceName;
             }
 
             return Task.CompletedTask;
@@ -66,6 +70,20 @@ namespace TeamsMicrophoneLevel
                 lock (_currentDeviceLock)
                 {
                     return _currentDeviceId;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the friendly device name.
+        /// </summary>
+        public string? CurrentDeviceName
+        {
+            get
+            {
+                lock (_currentDeviceLock)
+                {
+                    return _currentDeviceName;
                 }
             }
         }

@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="BaristaLabs.ChromeDevTools.Runtime" Version="70.0.3538.77" />
+    <PackageReference Include="Microsoft.Maui.Graphics" Version="6.0.403" />
+    <PackageReference Include="Microsoft.Maui.Graphics.Skia" Version="6.0.403" />
     <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="SkiaSharp.Views.WindowsForms" Version="2.88.0" />
   </ItemGroup>
