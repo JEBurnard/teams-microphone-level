@@ -38,7 +38,7 @@
             this.volumeControl.Location = new System.Drawing.Point(0, 0);
             this.volumeControl.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.volumeControl.Name = "volumeControl";
-            this.volumeControl.Size = new System.Drawing.Size(390, 76);
+            this.volumeControl.Size = new System.Drawing.Size(240, 20);
             this.volumeControl.TabIndex = 1;
             this.volumeControl.VSync = true;
             this.volumeControl.PaintSurface += new System.EventHandler<SkiaSharp.Views.Desktop.SKPaintGLSurfaceEventArgs>(this.VolumeControl_PaintSurface);
@@ -48,11 +48,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(390, 76);
+            this.ClientSize = new System.Drawing.Size(240, 20);
             this.Controls.Add(this.volumeControl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(50, 10);
             this.Name = "LevelForm";
             this.Opacity = 0.5D;
             this.ShowInTaskbar = false;

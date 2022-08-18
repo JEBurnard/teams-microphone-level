@@ -1,22 +1,29 @@
 using System.Text;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Graphics.Skia;
-using Color = Microsoft.Maui.Graphics.Color;
+using Font = Microsoft.Maui.Graphics.Font;
+using HorizontalAlignment = Microsoft.Maui.Graphics.HorizontalAlignment;
 
 namespace TeamsMicrophoneLevel
 {
     public partial class LevelForm : Form
     {
         // volume display min/max range
-        const double _maxPower = 0.0;
-        const double _minPower = -65.0;
-        const double _powerRange = _maxPower - _minPower;
+        private const double _maxPower = 0.0;
+        private const double _minPower = -65.0;
+        private const double _powerRange = _maxPower - _minPower;
 
         // form backing data
         private string? _deviceName = null;
-        double _power = -65.0;
-        bool _isCallActive = false;
-        bool _isMicrophoneOn = false;
+        private double _power = -65.0;
+        private bool _isCallActive = false;
+        private bool _isMicrophoneOn = false;
+
+        // display text
+        private readonly Font _font = new("Consolas");
+        private const float _fontSize = 10;
+        private const int _margin = 3;
+
 
         public LevelForm()
         {
@@ -54,26 +61,18 @@ namespace TeamsMicrophoneLevel
 
         private string GetStatusText()
         {
-            var status = new StringBuilder();
-
             if (_deviceName == null)
             {
-                status.Append("No Device");
-                return status.ToString();
-            }
-            else
-            {
-                status.Append(_deviceName);
-                status.Append(" - ");
+                return "No Device";
             }
 
-            if (!_isCallActive)
-            {
-                status.Append("No Call");
-                return status.ToString();
-            }
+            var status = new StringBuilder();
+            status.Append(_deviceName);
 
-            if (!_isMicrophoneOn)
+            status.Append(" - ");
+            status.Append(_isCallActive ? "In Call" : "No Call");
+
+            if (_isCallActive && !_isMicrophoneOn)
             {
                 status.Append(" - Muted");
             }
@@ -108,8 +107,12 @@ namespace TeamsMicrophoneLevel
             canvas.FillColor = Colors.LightGreen;
             canvas.FillRectangle(0, 0, width * volumePercentage, height);
 
-            // draw text in inverted colours
-            // todo
+            // draw text
+            canvas.Font = _font;
+            canvas.FontSize = _fontSize;
+            canvas.FontColor = Colors.White;
+            var fontHeight = canvas.GetStringSize(text, _font, _fontSize).Height;
+            canvas.DrawString(text, _margin, fontHeight + _margin, HorizontalAlignment.Left);
         }
     }
 }

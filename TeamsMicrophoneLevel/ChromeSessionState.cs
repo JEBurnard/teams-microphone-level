@@ -1,4 +1,4 @@
-﻿using BaristaLabs.ChromeDevTools.Runtime;
+﻿using System;
 
 namespace TeamsMicrophoneLevel
 {
@@ -7,13 +7,13 @@ namespace TeamsMicrophoneLevel
     /// </summary>
     internal class ChromeSessionState : IDisposable
     {
-        public ChromeSessionState(ChromeSession session, long muteButtonNodeId)
+        public ChromeSessionState(SafeChromeSession session, long muteButtonNodeId)
         {
             Session = session;
             MuteButtonNodeId = muteButtonNodeId;
         }
 
-        public ChromeSession Session { get; init; }
+        public SafeChromeSession Session { get; init; }
         public long MuteButtonNodeId { get; init; }
 
         public void Dispose()

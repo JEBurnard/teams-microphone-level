@@ -31,10 +31,7 @@ namespace TeamsMicrophoneLevel
         /// </summary>
         public async Task Poll()
         {
-            // add new sessions
-            // todo: maybe dont do this every poll?
             await ConnectSessions();
-
             await CheckSessionsMicrophoneOn();
         }
 
@@ -99,9 +96,11 @@ namespace TeamsMicrophoneLevel
                     }
                 }
             }
-            catch(HttpRequestException)
+            catch(Exception)
             {
                 _isConnected = false;
+                _isSessionActive = false;
+                _isMicrophoneOn = false;
             }
         }
 
@@ -122,11 +121,11 @@ namespace TeamsMicrophoneLevel
                 return;
             }
 
-            ChromeSession? session = null;
+            SafeChromeSession? session = null;
             try
             {
                 // connect to the session
-                session = new ChromeSession(debuggerUrl);
+                session = new SafeChromeSession(debuggerUrl);
 
                 // find the mute button
                 var document = await session.DOM.GetDocument(new GetDocumentCommand());
@@ -184,6 +183,7 @@ namespace TeamsMicrophoneLevel
                 if (micOn == null)
                 {
                     // this session had issues, remove it so we validate/recreate it again next time
+                    session.Dispose();
                     _sessions.Remove(id);
                     continue;
                 }
@@ -212,6 +212,12 @@ namespace TeamsMicrophoneLevel
         /// </summary>
         private async Task<bool?> CheckSessionMicrophoneOn(ChromeSessionState sessionState)
         {
+            // clean up faulted sessions
+            if (sessionState.Session.IsFaulted)
+            {
+                return null;
+            }
+
             try
             {
                 // get the attributes of the mute button
