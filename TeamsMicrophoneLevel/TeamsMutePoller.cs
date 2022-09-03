@@ -11,6 +11,8 @@ namespace TeamsMicrophoneLevel
         private bool _isSessionActive = false;
         private bool _isMicrophoneOn = false;
         private readonly object _stateLock = new object();
+        private DateTime _lastDevicePoll = DateTime.MinValue;
+        private readonly TimeSpan _connectedPollInterval = TimeSpan.FromSeconds(5);
         private readonly Dictionary<string, ChromeSessionState?> _sessions = new Dictionary<string, ChromeSessionState?>();
 
 
@@ -73,6 +75,13 @@ namespace TeamsMicrophoneLevel
         /// </summary>
         private async Task ConnectSessions()
         {
+            // exit early if we have recently checked successfully
+            if (_isConnected && _lastDevicePoll.Subtract(DateTime.UtcNow) < _connectedPollInterval)
+            {
+                return;
+            }
+            _lastDevicePoll = DateTime.UtcNow;
+
             try
             {
                 using (var webClient = new HttpClient())

@@ -11,7 +11,8 @@ namespace TeamsMicrophoneLevel
         private TeamsAudioDevicePoller _audioDevicePoller;
         private TeamsMutePoller _mutePoller;
         private LevelStreamer _levelStreamer;
-        private Task? _task;
+        private Task? _deviceTask;
+        private Task? _muteTask;
 
         // settings
         private int _debugPort = 8315;
@@ -22,7 +23,8 @@ namespace TeamsMicrophoneLevel
         private Action<bool>? _onIsMicrophoneChanged;
 
         // polling control
-        private readonly object _lock = new object();
+        private readonly object _lockDevice = new object();
+        private readonly object _lockMute = new object();
         private bool _stop = false;
 
 
@@ -39,14 +41,14 @@ namespace TeamsMicrophoneLevel
         }
 
 
-        public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan PollInterval { get; set; } = TimeSpan.FromMilliseconds(250);
 
         public int TeamsDebugPort
         {
             get { return _debugPort; }
             set
             {
-                lock (_lock)
+                lock (_lockMute)
                 {
                     _debugPort = value;
                     _mutePoller = new TeamsMutePoller(_debugPort);
@@ -58,7 +60,7 @@ namespace TeamsMicrophoneLevel
         {
             set
             {
-                lock (_lock)
+                lock (_lockDevice)
                 {
                     _onDeviceChanged = value;
                 }
@@ -69,7 +71,7 @@ namespace TeamsMicrophoneLevel
         {
             set
             {
-                lock (_lock)
+                lock (_lockDevice)
                 {
                     _levelStreamer.OnLevelAvaliable = value;
                 }
@@ -80,7 +82,7 @@ namespace TeamsMicrophoneLevel
         {
             set
             {
-                lock (_lock)
+                lock (_lockMute)
                 {
                     _onIsCallActiveChanged = value;
                 }
@@ -91,7 +93,7 @@ namespace TeamsMicrophoneLevel
         {
             set
             {
-                lock (_lock)
+                lock (_lockMute)
                 {
                     _onIsMicrophoneChanged = value;
                 }
@@ -103,42 +105,38 @@ namespace TeamsMicrophoneLevel
         {
             Stop();
             _stop = false;
-            _task = Task.Factory.StartNew(() => Run());
+            _deviceTask = Task.Factory.StartNew(() => RunDevicePoll());
+            _muteTask = Task.Factory.StartNew(() => RunMutePoll());
         }
 
         public void Stop()
         {
-            if (_task != null)
+            _stop = true;
+            if (_deviceTask != null)
             {
-                _stop = true;
-                _task.Wait();
-                _task = null;
+                _deviceTask.Wait();
+                _deviceTask = null;
+            }
+            if (_muteTask != null)
+            {
+                _muteTask.Wait();
+                _muteTask = null;
             }
         }
 
-        private void Run()
+        private void RunDevicePoll()
         {
+            var lastPoll = DateTime.UtcNow;
             string? oldDeviceName = null;
-            bool wasInCall = false;
-            bool wasMuted = false;
 
-            while(!_stop)
+            while (!_stop)
             {
-                lock (_lock)
+                lock (_lockDevice)
                 {
-                    // run all polling delegates
-                    Task.WaitAll(new[] {
-                        _audioDevicePoller.Poll(),
-                        _mutePoller.Poll()
-                    });
-                }
+                    _audioDevicePoller.Poll().Wait();
 
-                // update device beming monitored
-                _levelStreamer.TeamsDeviceId = _audioDevicePoller.CurrentDeviceId;
+                    _levelStreamer.TeamsDeviceId = _audioDevicePoller.CurrentDeviceId;
 
-                // notify callbacks
-                lock (_lock)
-                {
                     var deviceName = _audioDevicePoller.CurrentDeviceName;
                     if (!string.Equals(oldDeviceName, deviceName, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -148,6 +146,26 @@ namespace TeamsMicrophoneLevel
                             _onDeviceChanged.Invoke(deviceName);
                         }
                     }
+                }
+
+                if (!_stop)
+                {
+                    DoSleep(lastPoll);
+                }
+            }
+        }
+
+        private void RunMutePoll()
+        {
+            var lastPoll = DateTime.UtcNow;
+            bool wasInCall = false;
+            bool wasMuted = false;
+
+            while(!_stop)
+            {
+                lock (_lockMute)
+                {
+                    _mutePoller.Poll().Wait();
 
                     var isInCall = _mutePoller.IsCallActive;
                     if (isInCall != wasInCall)
@@ -170,12 +188,20 @@ namespace TeamsMicrophoneLevel
                     }
                 }
 
-                // next poll
                 if (!_stop)
                 {
-                    Thread.Sleep(PollInterval);
+                    DoSleep(lastPoll);
                 }
             }
+        }
+
+        private DateTime DoSleep(DateTime lastPoll)
+        {
+            var now = DateTime.UtcNow;
+            var msSinceLast = (int)now.Subtract(lastPoll).TotalMilliseconds;
+            var msInterval = (int)PollInterval.TotalMilliseconds;
+            Thread.Sleep(Math.Max(0, Math.Min(msInterval, msSinceLast)));
+            return now;
         }
     }
 }
