@@ -9,13 +9,14 @@ namespace TeamsMicrophoneLevel
         private string? _deviceId = null;
 
         // device monitor delegate
-        private WaveInEvent? _device = null;
+        private WasapiCapture? _device = null;
 
         // callback
         private Action<double>? _onLevelAvaliable = null;
 
         // thread safety
-        private readonly object _lock = new object();
+        private readonly object _deviceLock = new();
+        private readonly object _callbackLock = new();
 
 
         public LevelStreamer()
@@ -33,7 +34,7 @@ namespace TeamsMicrophoneLevel
             set 
             {
                 var changed = false;
-                lock (_lock)
+                lock (_deviceLock)
                 {
                     if (!string.Equals(_deviceId, value))
                     {
@@ -54,7 +55,7 @@ namespace TeamsMicrophoneLevel
         {
             set
             {
-                lock (_lock)
+                lock (_callbackLock)
                 {
                     _onLevelAvaliable = value;
                 }
@@ -70,16 +71,20 @@ namespace TeamsMicrophoneLevel
 
         public void Stop()
         {
-            if (_device != null)
+            lock (_deviceLock)
             {
-                _device.StopRecording();
-                _device = null;
+                if (_device != null)
+                {
+                    _device.StopRecording();
+                    _device.Dispose();
+                    _device = null;
+                }
             }
         }
 
         private void OpenDevice()
         {
-            lock (_lock)
+            lock (_deviceLock)
             { 
                 // need to pick a device first
                 if (_deviceId == null)
@@ -88,11 +93,11 @@ namespace TeamsMicrophoneLevel
                 }
 
                 // find the mm device by id
-                var deviceEnumerator = new MMDeviceEnumerator();
-                var mmDevice = deviceEnumerator.GetDevice(_deviceId);
+                using var deviceEnumerator = new MMDeviceEnumerator();
+                using var mmDevice = deviceEnumerator.GetDevice(_deviceId);
 
                 // open wave device (defaults to 100ms buffer)
-                var _device = new WasapiCapture(mmDevice)
+                _device = new WasapiCapture(mmDevice)
                 {
                     // todo: pick better values here
 
@@ -124,7 +129,7 @@ namespace TeamsMicrophoneLevel
             var power = 10.0 * Math.Log(amplitude);
 
             // report to delegate
-            lock (_lock)
+            lock (_callbackLock)
             {
                 if (_onLevelAvaliable != null)
                 {

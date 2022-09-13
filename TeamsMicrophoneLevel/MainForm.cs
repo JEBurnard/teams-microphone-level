@@ -31,8 +31,8 @@ namespace TeamsMicrophoneLevel
         {
             if (disposing)
             {
-                _levelForm.Dispose();
                 _controller.Dispose();
+                _levelForm.Dispose();
                 if (components != null)
                 {
                     components.Dispose();
@@ -45,9 +45,7 @@ namespace TeamsMicrophoneLevel
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
             _controller.Stop();
-            _levelForm.Close();
             Close();
-            //Application.Exit();
         }
 
         private void LaunchTeams_OnClick(object sender, EventArgs e)

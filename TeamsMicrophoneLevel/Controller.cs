@@ -23,8 +23,8 @@ namespace TeamsMicrophoneLevel
         private Action<bool>? _onIsMicrophoneChanged;
 
         // polling control
-        private readonly object _lockDevice = new object();
-        private readonly object _lockMute = new object();
+        private readonly object _lockDevice = new();
+        private readonly object _lockMute = new();
         private bool _stop = false;
 
 
@@ -117,11 +117,13 @@ namespace TeamsMicrophoneLevel
             if (_deviceTask != null)
             {
                 _deviceTask.Wait();
+                _deviceTask.Dispose();
                 _deviceTask = null;
             }
             if (_muteTask != null)
             {
                 _muteTask.Wait();
+                _muteTask.Dispose();
                 _muteTask = null;
             }
         }

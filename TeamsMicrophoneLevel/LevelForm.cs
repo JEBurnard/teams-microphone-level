@@ -96,10 +96,10 @@ namespace TeamsMicrophoneLevel
             float height = volumeControl.Height;
 
             // fill black
-            var canvas = new SkiaCanvas
+            using var canvas = new SkiaCanvas 
             {
-                Canvas = e.Surface.Canvas,
-                FillColor = Colors.Black,
+                Canvas = e.Surface.Canvas, 
+                FillColor = Colors.Black, 
             };
             canvas.FillRectangle(0, 0, width, height);
 

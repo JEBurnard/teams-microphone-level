@@ -18,34 +18,41 @@ namespace TeamsMicrophoneLevel
             string? deviceName = null;
 
             // iterate capture (microphone) devices
-            var deviceEnumerator = new MMDeviceEnumerator();
-            var devices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-            foreach (var device in devices)
+            using (var deviceEnumerator = new MMDeviceEnumerator())
             {
-                if (deviceId != null)
+                var devices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                foreach (var device in devices)
                 {
-                    // exit early if the devices used by teams has been already found
-                    break;
-                }
-
-                var sessionManager = device.AudioSessionManager;
-                if (sessionManager == null || sessionManager.Sessions == null)
-                {
-                    // skip this device if we cannot check sessions
-                    continue;
-                }
-
-                // iterate sessions using the device
-                for (var i = 0; i < sessionManager.Sessions.Count; ++i)
-                {
-                    var session = sessionManager.Sessions[i];
-                    if (session.GetSessionIdentifier.Contains("Teams.exe"))
+                    if (deviceId != null)
                     {
-                        // this session is for the teams process, save and exit early
-                        deviceId = device.ID;
-                        deviceName = device.DeviceFriendlyName;
+                        // exit early if the devices used by teams has been already found
                         break;
                     }
+
+                    var sessionManager = device.AudioSessionManager;
+                    if (sessionManager == null || sessionManager.Sessions == null)
+                    {
+                        // skip this device if we cannot check sessions
+                        continue;
+                    }
+
+                    // iterate sessions using the device
+                    for (var i = 0; i < sessionManager.Sessions.Count; ++i)
+                    {
+                        var session = sessionManager.Sessions[i];
+                        if (session.GetSessionIdentifier.Contains("Teams.exe"))
+                        {
+                            // this session is for the teams process, save and exit early
+                            deviceId = device.ID;
+                            deviceName = device.DeviceFriendlyName;
+                            break;
+                        }
+                    }
+                }
+
+                foreach (var device in devices)
+                {
+                    device.Dispose();
                 }
             }
 
