@@ -4,7 +4,7 @@ using WebSocket4Net;
 
 namespace TeamsMicrophoneLevel
 {
-    internal class SafeChromeSession : ChromeSession
+    internal class SafeChromeSession : ChromeSession, IDisposable
     {
         private readonly MethodInfo _receivedMethod;
         private readonly MethodInfo _openedMethod;
@@ -47,6 +47,16 @@ namespace TeamsMicrophoneLevel
             IsFaulted = false;
         }
 
+        public new void Dispose()
+        {
+            if (_socket != null)
+            {
+                _socket.Dispose();
+                _socket = null;
+            }
+            base.Dispose();
+        }
+
         public bool IsFaulted { get; private set; }
 
         private void SocketMessageReceived(object? sender, MessageReceivedEventArgs e)
@@ -56,7 +66,7 @@ namespace TeamsMicrophoneLevel
 
         private void SocketError(object? sender, SuperSocket.ClientEngine.ErrorEventArgs e)
         {
-            // signal that this session is dead / should be recreated?
+            // signal that this session is dead / should be recreated
             IsFaulted = true;
         }
 

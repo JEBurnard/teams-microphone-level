@@ -1,10 +1,9 @@
-﻿using BaristaLabs.ChromeDevTools.Runtime;
-using BaristaLabs.ChromeDevTools.Runtime.DOM;
+﻿using BaristaLabs.ChromeDevTools.Runtime.DOM;
 using Newtonsoft.Json;
 
 namespace TeamsMicrophoneLevel
 {
-    internal class TeamsMutePoller
+    internal class TeamsMutePoller : IDisposable
     {
         private readonly int _debugPort;
         private bool _isConnected = false;
@@ -13,7 +12,7 @@ namespace TeamsMicrophoneLevel
         private readonly object _stateLock = new object();
         private DateTime _lastDevicePoll = DateTime.MinValue;
         private readonly TimeSpan _connectedPollInterval = TimeSpan.FromSeconds(5);
-        private readonly Dictionary<string, ChromeSessionState?> _sessions = new Dictionary<string, ChromeSessionState?>();
+        private readonly Dictionary<string, ChromeSessionState?> _sessions = new();
 
 
         /// <summary>
@@ -25,6 +24,20 @@ namespace TeamsMicrophoneLevel
         public TeamsMutePoller(int port)
         {
             _debugPort = port;
+        }
+
+        public void Dispose()
+        {
+            var ids = _sessions.Keys.ToList();
+            foreach (var id in ids)
+            {
+                var session = _sessions[id];
+                if (session != null)
+                {
+                    session.Dispose();
+                    _sessions.Remove(id);
+                }
+            }
         }
 
         /// <summary>

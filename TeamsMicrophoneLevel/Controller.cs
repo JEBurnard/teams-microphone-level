@@ -38,6 +38,8 @@ namespace TeamsMicrophoneLevel
         public void Dispose()
         {
             Stop();
+            _mutePoller.Dispose();
+            _levelStreamer.Dispose();
         }
 
 

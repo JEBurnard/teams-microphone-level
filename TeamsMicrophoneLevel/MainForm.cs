@@ -24,9 +24,30 @@ namespace TeamsMicrophoneLevel
             _controller.Start();
         }
 
+        /// <summary>
+        /// Dispose - modified from designer generated code
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _levelForm.Dispose();
+                _controller.Dispose();
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
+
+
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            _controller.Stop();
+            _levelForm.Close();
+            Close();
+            //Application.Exit();
         }
 
         private void LaunchTeams_OnClick(object sender, EventArgs e)
