@@ -6,7 +6,6 @@ namespace TeamsMicrophoneLevel
     {
         private readonly Controller _controller = new Controller();
         private readonly LevelForm _levelForm = new LevelForm();
-        private readonly SettingsForm settingsForm = new SettingsForm();
 
         public MainForm()
         {
@@ -27,17 +26,13 @@ namespace TeamsMicrophoneLevel
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
-            Close();
-        }
-
-        private void SettingsMenuItem_Click(object sender, EventArgs e)
-        {
-            settingsForm.Show();
+            Application.Exit();
         }
 
         private void LaunchTeams_OnClick(object sender, EventArgs e)
         {
             // todo: close running instance & reopen with debug port (unless already correctly started)
+            // prompt user for debug port to use?
         }
     }
 }

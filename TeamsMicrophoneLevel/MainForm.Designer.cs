@@ -32,10 +32,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.settingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label = new System.Windows.Forms.Label();
             this.launchTeamsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label = new System.Windows.Forms.Label();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,11 +48,17 @@
             // trayMenu
             // 
             this.trayMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsMenuItem,
             this.launchTeamsMenuItem,
             this.exitMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(181, 92);
+            this.trayMenu.Size = new System.Drawing.Size(181, 70);
+            // 
+            // launchTeamsMenuItem
+            // 
+            this.launchTeamsMenuItem.Name = "launchTeamsMenuItem";
+            this.launchTeamsMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.launchTeamsMenuItem.Text = "&Launch Teams";
+            this.launchTeamsMenuItem.Click += new System.EventHandler(this.LaunchTeams_OnClick);
             // 
             // exitMenuItem
             // 
@@ -61,13 +66,6 @@
             this.exitMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitMenuItem.Text = "E&xit";
             this.exitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
-            // 
-            // settingsMenuItem
-            // 
-            this.settingsMenuItem.Name = "settingsMenuItem";
-            this.settingsMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.settingsMenuItem.Text = "&Settings";
-            this.settingsMenuItem.Click += new System.EventHandler(this.SettingsMenuItem_Click);
             // 
             // label
             // 
@@ -77,13 +75,6 @@
             this.label.Size = new System.Drawing.Size(255, 15);
             this.label.TabIndex = 0;
             this.label.Text = "Program entry point - for system tray icon only";
-            // 
-            // launchTeamsMenuItem
-            // 
-            this.launchTeamsMenuItem.Name = "launchTeamsMenuItem";
-            this.launchTeamsMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.launchTeamsMenuItem.Text = "&Launch Teams";
-            this.launchTeamsMenuItem.Click += new System.EventHandler(this.LaunchTeams_OnClick);
             // 
             // MainForm
             // 
@@ -109,7 +100,6 @@
         private Label label;
         private ContextMenuStrip trayMenu;
         private ToolStripMenuItem exitMenuItem;
-        private ToolStripMenuItem settingsMenuItem;
         private ToolStripMenuItem launchTeamsMenuItem;
     }
 }
