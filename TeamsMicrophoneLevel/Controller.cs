@@ -51,13 +51,12 @@ namespace TeamsMicrophoneLevel
             get { return _debugPort; }
             set
             {
-                lock (_lockMute)
+                if (_debugPort != value)
                 {
-                    if (_debugPort != value)
-                    {
-                        _debugPort = value;
-                        _mutePoller = new TeamsMutePoller(_debugPort);
-                    }
+                    Stop();
+                    _debugPort = value;
+                    _mutePoller = new TeamsMutePoller(_debugPort);
+                    Start();
                 }
             }
         }
