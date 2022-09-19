@@ -99,8 +99,6 @@ namespace TeamsMicrophoneLevel
                 // open wave device (defaults to 100ms buffer)
                 _device = new WasapiCapture(mmDevice)
                 {
-                    // todo: pick better values here
-
                     // set up a 1khz, 16 bit int, mono PCM (amplitude) stream
                     WaveFormat = new WaveFormat(rate: 1000, bits: 16, channels: 1)
                 };
@@ -120,9 +118,6 @@ namespace TeamsMicrophoneLevel
                 int value = BitConverter.ToInt16(e.Buffer, index);
                 latestMax = Math.Max(latestMax, value);
             }
-
-            // todo: smoothing / windowing / rolling average?
-            // rms to average instead of single max level?
 
             // convert to db
             var amplitude = (double)latestMax / short.MaxValue;
