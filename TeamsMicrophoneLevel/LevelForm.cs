@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Graphics.Skia;
+using Color = Microsoft.Maui.Graphics.Color;
 using Font = Microsoft.Maui.Graphics.Font;
 using HorizontalAlignment = Microsoft.Maui.Graphics.HorizontalAlignment;
 
@@ -98,6 +99,30 @@ namespace TeamsMicrophoneLevel
             return status.ToString();
         }
 
+        private Color GetVolumeColour()
+        {
+            if (_deviceName == null || !_isStatusConnected)
+            {
+                // unknown status of teams
+                return Colors.DarkGrey;
+            }
+
+            if (!_isCallActive)
+            {
+                // not in a call
+                return Colors.Gold;
+            }
+            
+            if (!_isMicrophoneOn)
+            {
+                // muted
+                return Colors.Red;
+            }
+
+            // mic on
+            return Colors.LightGreen;
+        }
+
         private float GetVolumePercentage()
         {
             var rangePower = _power - _minPower;
@@ -122,7 +147,7 @@ namespace TeamsMicrophoneLevel
             canvas.FillRectangle(0, 0, width, height);
 
             // draw volume power
-            canvas.FillColor = Colors.LightGreen;
+            canvas.FillColor = GetVolumeColour();
             canvas.FillRectangle(0, 0, width * volumePercentage, height);
 
             // draw text
