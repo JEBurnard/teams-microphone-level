@@ -16,6 +16,7 @@ namespace TeamsMicrophoneLevel
         // form backing data
         private string? _deviceName = null;
         private double _power = -65.0;
+        private bool _isStatusConnected = false;
         private bool _isCallActive = false;
         private bool _isMicrophoneOn = false;
 
@@ -39,6 +40,12 @@ namespace TeamsMicrophoneLevel
         public void OnLevelAvaliable(double power)
         {
             _power = power;
+            UpdateUi();
+        }
+
+        public void OnIsCallStatusConnectedChanged(bool isConnected)
+        {
+            _isStatusConnected = isConnected;
             UpdateUi();
         }
 
@@ -70,11 +77,22 @@ namespace TeamsMicrophoneLevel
             status.Append(_deviceName);
 
             status.Append(" - ");
-            status.Append(_isCallActive ? "In Call" : "No Call");
 
-            if (_isCallActive && !_isMicrophoneOn)
+            if (!_isStatusConnected)
             {
-                status.Append(" - Muted");
+                status.Append("No Teams Connection");
+            }
+            else if (!_isCallActive)
+            {
+                status.Append("No Call");
+            }
+            else
+            {
+                status.Append("In Call");
+                if (!_isMicrophoneOn)
+                {
+                    status.Append(" - Muted");
+                }
             }
 
             return status.ToString();
@@ -111,8 +129,16 @@ namespace TeamsMicrophoneLevel
             canvas.Font = _font;
             canvas.FontSize = _fontSize;
             canvas.FontColor = Colors.White;
-            var fontHeight = canvas.GetStringSize(text, _font, _fontSize).Height;
+            var stringSize = canvas.GetStringSize(text, _font, _fontSize);
+            var fontHeight = stringSize.Height;
             canvas.DrawString(text, _margin, fontHeight + _margin, HorizontalAlignment.Left);
+
+            // trigger resize (next paint) if the form is to small
+            var fontWidth = (int)Math.Ceiling(stringSize.Width);
+            if (fontWidth > Width)
+            {
+                Width = fontWidth;
+            }
         }
     }
 }

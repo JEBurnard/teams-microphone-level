@@ -51,6 +51,20 @@ namespace TeamsMicrophoneLevel
         }
 
         /// <summary>
+        /// Check to see if we are connected to the teams debug port.
+        /// </summary>
+        public bool IsStatusConnected
+        {
+            get
+            {
+                lock (_stateLock)
+                {
+                    return _isConnected;
+                }
+            }
+        }
+
+        /// <summary>
         /// Check to see if a call is running.
         /// </summary>
         /// <remarks>

@@ -19,6 +19,7 @@ namespace TeamsMicrophoneLevel
 
         // callbacks
         private Action<string?>? _onDeviceChanged;
+        private Action<bool>? _onIsCallStatusConnectedChanged;
         private Action<bool>? _onIsCallActiveChanged;
         private Action<bool>? _onIsMicrophoneChanged;
 
@@ -82,6 +83,18 @@ namespace TeamsMicrophoneLevel
                 }
             }
         }
+
+        public Action<bool>? OnIsCallStatusConnectedChanged
+        {
+            set
+            {
+                lock (_lockMute)
+                {
+                    _onIsCallStatusConnectedChanged = value;
+                }
+            }
+        }
+
 
         public Action<bool>? OnIsCallActiveChanged
         {
@@ -165,6 +178,7 @@ namespace TeamsMicrophoneLevel
         private void RunMutePoll()
         {
             var lastPoll = DateTime.UtcNow;
+            bool wasConnected = false;
             bool wasInCall = false;
             bool wasMuted = false;
 
@@ -173,6 +187,16 @@ namespace TeamsMicrophoneLevel
                 lock (_lockMute)
                 {
                     _mutePoller.Poll().Wait();
+
+                    var isConnected = _mutePoller.IsStatusConnected;
+                    if (isConnected != wasConnected)
+                    {
+                        wasConnected = isConnected;
+                        if (_onIsCallStatusConnectedChanged != null)
+                        {
+                            _onIsCallStatusConnectedChanged(isConnected);
+                        }
+                    }
 
                     var isInCall = _mutePoller.IsCallActive;
                     if (isInCall != wasInCall)

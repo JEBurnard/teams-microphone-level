@@ -20,6 +20,7 @@ namespace TeamsMicrophoneLevel
 
             // hook up delegates
             _controller.OnDeviceChanged = x => _levelForm.OnDeviceChanged(x);
+            _controller.OnIsCallStatusConnectedChanged = x => _levelForm.OnIsCallStatusConnectedChanged(x);
             _controller.OnIsCallActiveChanged = x => _levelForm.OnIsCallActiveChanged(x);
             _controller.OnIsMicrophoneChanged = x => _levelForm.OnIsMicrophoneChanged(x);
             _controller.OnLevelAvaliable = x => _levelForm.OnLevelAvaliable(x);
