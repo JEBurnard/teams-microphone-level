@@ -22,6 +22,7 @@
             this.launchTeamsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label = new System.Windows.Forms.Label();
+            this.launchTeamsWithPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -36,21 +37,22 @@
             // 
             this.trayMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.launchTeamsMenuItem,
+            this.launchTeamsWithPortMenuItem,
             this.exitMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(181, 70);
+            this.trayMenu.Size = new System.Drawing.Size(209, 92);
             // 
             // launchTeamsMenuItem
             // 
             this.launchTeamsMenuItem.Name = "launchTeamsMenuItem";
-            this.launchTeamsMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.launchTeamsMenuItem.Size = new System.Drawing.Size(208, 22);
             this.launchTeamsMenuItem.Text = "&Launch Teams";
             this.launchTeamsMenuItem.Click += new System.EventHandler(this.LaunchTeams_OnClick);
             // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(208, 22);
             this.exitMenuItem.Text = "E&xit";
             this.exitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
             // 
@@ -62,6 +64,13 @@
             this.label.Size = new System.Drawing.Size(255, 15);
             this.label.TabIndex = 0;
             this.label.Text = "Program entry point - for system tray icon only";
+            // 
+            // launchTeamsWithPortMenuItem
+            // 
+            this.launchTeamsWithPortMenuItem.Name = "launchTeamsWithPortMenuItem";
+            this.launchTeamsWithPortMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.launchTeamsWithPortMenuItem.Text = "Launch Teams (with &port)";
+            this.launchTeamsWithPortMenuItem.Click += new System.EventHandler(this.LaunchTeamsWithPortMenuItem_Click);
             // 
             // MainForm
             // 
@@ -88,5 +97,6 @@
         private ContextMenuStrip trayMenu;
         private ToolStripMenuItem exitMenuItem;
         private ToolStripMenuItem launchTeamsMenuItem;
+        private ToolStripMenuItem launchTeamsWithPortMenuItem;
     }
 }

@@ -11,6 +11,13 @@ namespace TeamsMicrophoneLevel
         {
             InitializeComponent();
 
+            // see if teams is running
+            var port = TeamsProcessController.GetTeamsDebugPort();
+            if (port != null)
+            {
+                _controller.TeamsDebugPort = port.Value;
+            }
+
             // hook up delegates
             _controller.OnDeviceChanged = x => _levelForm.OnDeviceChanged(x);
             _controller.OnIsCallActiveChanged = x => _levelForm.OnIsCallActiveChanged(x);
@@ -50,8 +57,20 @@ namespace TeamsMicrophoneLevel
 
         private void LaunchTeams_OnClick(object sender, EventArgs e)
         {
-            // todo: close running instance & reopen with debug port (unless already correctly started)
-            // prompt user for debug port to use?
+            var usedPort = TeamsProcessController.StartOrCheckTeams(_controller.TeamsDebugPort);
+            _controller.TeamsDebugPort = usedPort;
+        }
+
+        private void LaunchTeamsWithPortMenuItem_Click(object sender, EventArgs e)
+        {
+            var portDialog = new DebugPortForm(_controller.TeamsDebugPort);
+            if (portDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            _controller.TeamsDebugPort = portDialog.Port;
+            TeamsProcessController.StartTeams(_controller.TeamsDebugPort);
         }
     }
 }

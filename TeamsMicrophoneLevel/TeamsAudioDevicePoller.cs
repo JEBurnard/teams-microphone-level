@@ -40,7 +40,7 @@ namespace TeamsMicrophoneLevel
                     for (var i = 0; i < sessionManager.Sessions.Count; ++i)
                     {
                         var session = sessionManager.Sessions[i];
-                        if (session.GetSessionIdentifier.Contains("Teams.exe"))
+                        if (session.GetSessionIdentifier.Contains(Constants.TeamsExecutableName))
                         {
                             // this session is for the teams process, save and exit early
                             deviceId = device.ID;
