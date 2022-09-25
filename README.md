@@ -15,7 +15,7 @@ TODO
 ## Technical Details
 
 * Uses Chrome Developer Tools protocol to inspect the Microsoft Teams electron application
-to find the state of the mute button.
+to find the state of the mute button (ctrl+shift+I on Windws).
 * Uses MMDevice API to find the microphone device used by Teams.
 
 ## Sources

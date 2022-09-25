@@ -4,8 +4,9 @@ namespace TeamsMicrophoneLevel
 {
     public partial class MainForm : Form
     {
-        private readonly Controller _controller = new Controller();
-        private readonly LevelForm _levelForm = new LevelForm();
+        private readonly Controller _controller = new();
+        private readonly LevelForm _levelForm = new();
+        private readonly StatusForm _statusForm = new();
 
         public MainForm()
         {
@@ -25,6 +26,9 @@ namespace TeamsMicrophoneLevel
             _controller.OnIsMicrophoneChanged = x => _levelForm.OnIsMicrophoneChanged(x);
             _controller.OnLevelAvaliable = x => _levelForm.OnLevelAvaliable(x);
 
+            // hook up internals to status
+            _statusForm.Controller = _controller;
+
             // show the level ui form
             _levelForm.Show();
 
@@ -41,6 +45,7 @@ namespace TeamsMicrophoneLevel
             {
                 _controller.Dispose();
                 _levelForm.Dispose();
+                _statusForm.Dispose();
                 if (components != null)
                 {
                     components.Dispose();
@@ -56,7 +61,7 @@ namespace TeamsMicrophoneLevel
             Close();
         }
 
-        private void LaunchTeams_OnClick(object sender, EventArgs e)
+        private void LaunchTeams_Click(object sender, EventArgs e)
         {
             var usedPort = TeamsProcessController.StartOrCheckTeams(_controller.TeamsDebugPort);
             _controller.TeamsDebugPort = usedPort;
@@ -72,6 +77,11 @@ namespace TeamsMicrophoneLevel
 
             _controller.TeamsDebugPort = portDialog.Port;
             TeamsProcessController.StartTeams(_controller.TeamsDebugPort);
+        }
+
+        private void StatusMenuItem_Click(object sender, EventArgs e)
+        {
+            _statusForm.Show();
         }
     }
 }

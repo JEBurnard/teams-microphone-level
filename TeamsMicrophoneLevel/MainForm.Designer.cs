@@ -20,9 +20,10 @@
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.launchTeamsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.launchTeamsWithPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label = new System.Windows.Forms.Label();
-            this.launchTeamsWithPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -38,16 +39,24 @@
             this.trayMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.launchTeamsMenuItem,
             this.launchTeamsWithPortMenuItem,
+            this.statusMenuItem,
             this.exitMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(209, 92);
+            this.trayMenu.Size = new System.Drawing.Size(209, 114);
             // 
             // launchTeamsMenuItem
             // 
             this.launchTeamsMenuItem.Name = "launchTeamsMenuItem";
             this.launchTeamsMenuItem.Size = new System.Drawing.Size(208, 22);
             this.launchTeamsMenuItem.Text = "&Launch Teams";
-            this.launchTeamsMenuItem.Click += new System.EventHandler(this.LaunchTeams_OnClick);
+            this.launchTeamsMenuItem.Click += new System.EventHandler(this.LaunchTeams_Click);
+            // 
+            // launchTeamsWithPortMenuItem
+            // 
+            this.launchTeamsWithPortMenuItem.Name = "launchTeamsWithPortMenuItem";
+            this.launchTeamsWithPortMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.launchTeamsWithPortMenuItem.Text = "Launch Teams (with &port)";
+            this.launchTeamsWithPortMenuItem.Click += new System.EventHandler(this.LaunchTeamsWithPortMenuItem_Click);
             // 
             // exitMenuItem
             // 
@@ -65,12 +74,12 @@
             this.label.TabIndex = 0;
             this.label.Text = "Program entry point - for system tray icon only";
             // 
-            // launchTeamsWithPortMenuItem
+            // statusMenuItem
             // 
-            this.launchTeamsWithPortMenuItem.Name = "launchTeamsWithPortMenuItem";
-            this.launchTeamsWithPortMenuItem.Size = new System.Drawing.Size(208, 22);
-            this.launchTeamsWithPortMenuItem.Text = "Launch Teams (with &port)";
-            this.launchTeamsWithPortMenuItem.Click += new System.EventHandler(this.LaunchTeamsWithPortMenuItem_Click);
+            this.statusMenuItem.Name = "statusMenuItem";
+            this.statusMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.statusMenuItem.Text = "&Status";
+            this.statusMenuItem.Click += new System.EventHandler(this.StatusMenuItem_Click);
             // 
             // MainForm
             // 
@@ -98,5 +107,6 @@
         private ToolStripMenuItem exitMenuItem;
         private ToolStripMenuItem launchTeamsMenuItem;
         private ToolStripMenuItem launchTeamsWithPortMenuItem;
+        private ToolStripMenuItem statusMenuItem;
     }
 }

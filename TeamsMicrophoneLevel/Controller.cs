@@ -44,6 +44,29 @@ namespace TeamsMicrophoneLevel
         }
 
 
+        internal TeamsAudioDevicePoller DevicePoller
+        {
+            get
+            {
+                lock (_lockDevice)
+                {
+                    return _audioDevicePoller;
+                }
+            }
+        }
+
+        internal TeamsMutePoller MutePoller
+        {
+            get
+            {
+                lock (_lockDevice)
+                {
+                    return _mutePoller;
+                }
+            }
+        }
+
+
         public TimeSpan PollInterval { get; set; } = TimeSpan.FromMilliseconds(250);
 
         public int TeamsDebugPort

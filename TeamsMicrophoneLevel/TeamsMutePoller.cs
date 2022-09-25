@@ -51,6 +51,11 @@ namespace TeamsMicrophoneLevel
         }
 
         /// <summary>
+        /// Accessor for the configured debug port to poll.
+        /// </summary>
+        public int DebugPort => _debugPort;
+
+        /// <summary>
         /// Check to see if we are connected to the teams debug port.
         /// </summary>
         public bool IsStatusConnected
@@ -63,6 +68,11 @@ namespace TeamsMicrophoneLevel
                 }
             }
         }
+
+        /// <summary>
+        /// Count of debug sessions (tabs) we can see in teams.
+        /// </summary>
+        public int Sessions => _sessions.Count;
 
         /// <summary>
         /// Check to see if a call is running.
