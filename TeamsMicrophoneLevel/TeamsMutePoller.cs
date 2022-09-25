@@ -1,5 +1,7 @@
 ﻿using BaristaLabs.ChromeDevTools.Runtime.DOM;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace TeamsMicrophoneLevel
 {
@@ -13,6 +15,7 @@ namespace TeamsMicrophoneLevel
         private DateTime _lastDevicePoll = DateTime.MinValue;
         private readonly TimeSpan _connectedPollInterval = TimeSpan.FromSeconds(5);
         private readonly Dictionary<string, ChromeSessionState?> _sessions = new();
+        private static readonly int _timeoutMilliseconds = 500;
 
 
         /// <summary>
@@ -28,6 +31,11 @@ namespace TeamsMicrophoneLevel
 
         public void Dispose()
         {
+            ClearSessions();
+        }
+
+        private void ClearSessions()
+        {
             var ids = _sessions.Keys.ToList();
             foreach (var id in ids)
             {
@@ -38,16 +46,17 @@ namespace TeamsMicrophoneLevel
                     _sessions.Remove(id);
                 }
             }
+            _sessions.Clear();
         }
 
         /// <summary>
         /// Poll the teams electron process (running in debug mode) to see if the mute
         /// button is clicked.
         /// </summary>
-        public async Task Poll()
+        public async Task Poll(CancellationToken token)
         {
-            await ConnectSessions();
-            await CheckSessionsMicrophoneOn();
+            await ConnectSessions(token);
+            await CheckSessionsMicrophoneOn(token);
         }
 
         /// <summary>
@@ -110,7 +119,7 @@ namespace TeamsMicrophoneLevel
         /// <summary>
         /// Connect to teams dev tools and connect debugger sessions.
         /// </summary>
-        private async Task ConnectSessions()
+        private async Task ConnectSessions(CancellationToken token)
         {
             // exit early if we have recently checked successfully
             if (_isConnected && DateTime.UtcNow.Subtract(_lastDevicePoll) < _connectedPollInterval)
@@ -138,12 +147,13 @@ namespace TeamsMicrophoneLevel
                     // iterate sessions (tabs)
                     foreach (var sessionInfo in sessionsInfo.Where(x => x.Type == "page"))
                     {
-                        await CheckAndAddSession(sessionInfo.Id, sessionInfo.WebSocketDebuggerUrl);
+                        await CheckAndAddSession(sessionInfo.Id, sessionInfo.WebSocketDebuggerUrl, token);
                     }
                 }
             }
             catch(Exception)
             {
+                ClearSessions();
                 _isConnected = false;
                 _isSessionActive = false;
                 _isMicrophoneOn = false;
@@ -153,7 +163,7 @@ namespace TeamsMicrophoneLevel
         /// <summary>
         /// Add a session if it contains the mute button we want to inspect.
         /// </summary>
-        private async Task CheckAndAddSession(string? id, string? debuggerUrl)
+        private async Task CheckAndAddSession(string? id, string? debuggerUrl, CancellationToken token)
         {
             // skip invalid sessions
             if (id == null || debuggerUrl == null)
@@ -173,16 +183,20 @@ namespace TeamsMicrophoneLevel
                 // connect to the session
                 session = new SafeChromeSession(debuggerUrl);
 
-                // find the mute button
-                var document = await session.DOM.GetDocument(new GetDocumentCommand());
-                var muteButton = await session.DOM.QuerySelector(new QuerySelectorCommand
-                {
-                    NodeId = document.Root.NodeId,
-                    Selector = "button#microphone-button",
-                });
+                // find the document
+                var document = await session.DOM.GetDocument(new GetDocumentCommand(), token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
 
-                // only interested in pages with the mute button
-                if (muteButton.NodeId == 0)
+                // determine if the session is a potential call window
+                var isCallSession = await IsCallSession(session, document, token);
+                if (isCallSession == null)
+                {
+                    // faulted - clean up
+                    session.Dispose();
+                    session = null;
+                    return;
+                }
+
+                if (isCallSession == false)
                 {
                     // save as not interesting
                     _sessions.Add(id, null);
@@ -192,7 +206,24 @@ namespace TeamsMicrophoneLevel
                     session = null;
                     return;
                 }
+                
+                // find the mute button
+                var muteButton = await session.DOM.QuerySelector(new QuerySelectorCommand
+                {
+                    NodeId = document.Root.NodeId,
+                    Selector = "button#microphone-button",
+                }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
 
+                // only interested in pages with the mute button
+                // (but the mute button may be loaded later = do not save so we check again)
+                if (muteButton.NodeId == 0)
+                {
+                    // clean up
+                    session.Dispose();
+                    session = null;
+                    return;
+                }
+                
                 // save this session that we are interested in
                 _sessions.Add(id, new ChromeSessionState(session, muteButton.NodeId));
             }
@@ -202,13 +233,53 @@ namespace TeamsMicrophoneLevel
                 {
                     session.Dispose();
                 }
+                _sessions.Remove(id);
             }
+        }
+
+        /// <summary>
+        /// Determine if the session is a for a call.
+        /// Return null if faulted.
+        /// </summary>
+        private static async Task<bool?> IsCallSession(SafeChromeSession session, GetDocumentCommandResponse document, CancellationToken token)
+        {
+            if (session.IsFaulted)
+            {
+                return null;
+            }
+
+            var body = await session.DOM.QuerySelector(new QuerySelectorCommand
+            {
+                NodeId = document.Root.NodeId,
+                Selector = "body",
+            }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+
+            var attributes = await session.DOM.GetAttributes(new GetAttributesCommand
+            {
+                NodeId = body.NodeId,
+            }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+
+            var attrributePairs = AttributesToDictionary(attributes.Attributes);
+
+            if (attrributePairs.TryGetValue("id", out var id) && string.Equals(id, "child-window-body"))
+            {
+                // large window
+                return true;
+            }
+
+            if (attrributePairs.TryGetValue("role", out var role) && string.Equals(role, "presentation"))
+            {
+                // small window
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Check all connected sessions to see if any session has the microphone on.
         /// </summary>
-        private async Task CheckSessionsMicrophoneOn()
+        private async Task CheckSessionsMicrophoneOn(CancellationToken token)
         {
             // temporary state
             var isSessionActive = false;
@@ -225,7 +296,7 @@ namespace TeamsMicrophoneLevel
                     continue;
                 }
 
-                var micOn = await CheckSessionMicrophoneOn(session);
+                var micOn = await CheckSessionMicrophoneOn(session, token);
                 if (micOn == null)
                 {
                     // this session had issues, remove it so we validate/recreate it again next time
@@ -256,7 +327,7 @@ namespace TeamsMicrophoneLevel
         /// <summary>
         /// Check the specified session to see if the microphone is on.
         /// </summary>
-        private async Task<bool?> CheckSessionMicrophoneOn(ChromeSessionState sessionState)
+        private static async Task<bool?> CheckSessionMicrophoneOn(ChromeSessionState sessionState, CancellationToken token)
         {
             // clean up faulted sessions
             if (sessionState.Session.IsFaulted)
@@ -270,7 +341,7 @@ namespace TeamsMicrophoneLevel
                 var attributes = await sessionState.Session.DOM.GetAttributes(new GetAttributesCommand 
                 { 
                     NodeId = sessionState.MuteButtonNodeId,
-                });
+                }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
                 var attrributePairs = AttributesToDictionary(attributes.Attributes);
 
                 // the minimised call window overlay
@@ -311,7 +382,7 @@ namespace TeamsMicrophoneLevel
         /// <summary>
         /// Convert the 1D string array of attribute key/value pairs to a dictionary.
         /// </summary>
-        public static Dictionary<string, string> AttributesToDictionary(string[] array)
+        private static Dictionary<string, string> AttributesToDictionary(string[] array)
         {
             var dict = new Dictionary<string, string>();
 
@@ -325,5 +396,6 @@ namespace TeamsMicrophoneLevel
 
             return dict;
         }
+
     }
 }

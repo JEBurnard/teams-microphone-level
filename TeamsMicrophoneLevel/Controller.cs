@@ -24,9 +24,9 @@ namespace TeamsMicrophoneLevel
         private Action<bool>? _onIsMicrophoneChanged;
 
         // polling control
+        private CancellationTokenSource _tokenSource = new();
         private readonly object _lockDevice = new();
         private readonly object _lockMute = new();
-        private bool _stop = false;
 
 
         public Controller()
@@ -144,14 +144,14 @@ namespace TeamsMicrophoneLevel
         public void Start()
         {
             Stop();
-            _stop = false;
+            _tokenSource = new CancellationTokenSource();
             _deviceTask = Task.Factory.StartNew(() => RunDevicePoll());
             _muteTask = Task.Factory.StartNew(() => RunMutePoll());
         }
 
         public void Stop()
         {
-            _stop = true;
+            _tokenSource.Cancel();
             if (_deviceTask != null)
             {
                 _deviceTask.Wait();
@@ -171,7 +171,7 @@ namespace TeamsMicrophoneLevel
             var lastPoll = DateTime.UtcNow;
             string? oldDeviceName = null;
 
-            while (!_stop)
+            while (!_tokenSource.IsCancellationRequested)
             {
                 lock (_lockDevice)
                 {
@@ -190,7 +190,7 @@ namespace TeamsMicrophoneLevel
                     }
                 }
 
-                if (!_stop)
+                if (!_tokenSource.IsCancellationRequested)
                 {
                     DoSleep(lastPoll);
                 }
@@ -204,11 +204,11 @@ namespace TeamsMicrophoneLevel
             bool wasInCall = false;
             bool wasMuted = false;
 
-            while(!_stop)
+            while(!_tokenSource.IsCancellationRequested)
             {
                 lock (_lockMute)
                 {
-                    _mutePoller.Poll().Wait();
+                    _mutePoller.Poll(_tokenSource.Token).Wait();
 
                     var isConnected = _mutePoller.IsStatusConnected;
                     if (isConnected != wasConnected)
@@ -241,7 +241,7 @@ namespace TeamsMicrophoneLevel
                     }
                 }
 
-                if (!_stop)
+                if (!_tokenSource.IsCancellationRequested)
                 {
                     DoSleep(lastPoll);
                 }
