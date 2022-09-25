@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StatusForm));
             this.audioGroupBox = new System.Windows.Forms.GroupBox();
             this.deviceValueLabel = new System.Windows.Forms.Label();
             this.deviceLabel = new System.Windows.Forms.Label();
@@ -239,12 +240,14 @@
             this.Controls.Add(this.processGroupBox);
             this.Controls.Add(this.audioGroupBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "StatusForm";
             this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Teams Volume Level - Status";
+            this.TopMost = true;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.StatusForm_FormClosed);
             this.Shown += new System.EventHandler(this.StatusForm_Shown);
             this.audioGroupBox.ResumeLayout(false);

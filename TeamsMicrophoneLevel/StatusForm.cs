@@ -4,12 +4,13 @@ namespace TeamsMicrophoneLevel
 {
     public partial class StatusForm : Form
     {
-        public StatusForm()
+        private readonly Controller _controller;
+
+        public StatusForm(Controller controller)
         {
             InitializeComponent();
+            _controller = controller;  
         }
-
-        internal Controller? Controller { get; set; }
 
         private void StatusForm_Shown(object sender, EventArgs e)
         {
@@ -24,12 +25,12 @@ namespace TeamsMicrophoneLevel
         private void PollTimer_Tick(object sender, EventArgs e)
         {
             var processDebugPort = TeamsProcessController.GetTeamsDebugPort();
-            var audioDeviceName = Controller?.DevicePoller?.CurrentDeviceName;
-            var muteDebugPort = Controller?.MutePoller?.DebugPort;
-            var muteIsConnected = Controller?.MutePoller?.IsStatusConnected;
-            var muteDebugSessions = Controller?.MutePoller?.Sessions;
-            var muteCallSessionActive = Controller?.MutePoller?.IsCallActive;
-            var muteMicOn = Controller?.MutePoller?.IsMicrophoneOn;
+            var audioDeviceName = _controller?.DevicePoller?.CurrentDeviceName;
+            var muteDebugPort = _controller?.MutePoller?.DebugPort;
+            var muteIsConnected = _controller?.MutePoller?.IsStatusConnected;
+            var muteDebugSessions = _controller?.MutePoller?.Sessions;
+            var muteCallSessionActive = _controller?.MutePoller?.IsCallActive;
+            var muteMicOn = _controller?.MutePoller?.IsMicrophoneOn;
 
             debugPortValueLabel.Text = processDebugPort == null ? "NA" : $"{processDebugPort}";
             deviceValueLabel.Text = audioDeviceName ?? "NA";

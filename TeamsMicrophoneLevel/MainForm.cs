@@ -6,7 +6,7 @@ namespace TeamsMicrophoneLevel
     {
         private readonly Controller _controller = new();
         private readonly LevelForm _levelForm = new();
-        private readonly StatusForm _statusForm = new();
+        private StatusForm? _statusForm = null;
 
         public MainForm()
         {
@@ -26,9 +26,6 @@ namespace TeamsMicrophoneLevel
             _controller.OnIsMicrophoneChanged = x => _levelForm.OnIsMicrophoneChanged(x);
             _controller.OnLevelAvaliable = x => _levelForm.OnLevelAvaliable(x);
 
-            // hook up internals to status
-            _statusForm.Controller = _controller;
-
             // show the level ui form
             _levelForm.Show();
 
@@ -45,7 +42,7 @@ namespace TeamsMicrophoneLevel
             {
                 _controller.Dispose();
                 _levelForm.Dispose();
-                _statusForm.Dispose();
+                _statusForm?.Dispose();
                 if (components != null)
                 {
                     components.Dispose();
@@ -81,7 +78,16 @@ namespace TeamsMicrophoneLevel
 
         private void StatusMenuItem_Click(object sender, EventArgs e)
         {
-            _statusForm.Show();
+            if (_statusForm == null || _statusForm.IsDisposed)
+            {
+                // show status form below the level form
+                _statusForm = new StatusForm(_controller)
+                {
+                    Top = _levelForm.Top + _levelForm.Height + 10,
+                    Left = _levelForm.Left + 10
+                };
+                _statusForm.Show();
+            }
         }
     }
 }

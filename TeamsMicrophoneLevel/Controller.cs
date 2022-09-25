@@ -6,7 +6,7 @@ namespace TeamsMicrophoneLevel
     /// <summary>
     /// The main logic controller for this system.
     /// </summary>
-    internal class Controller : IDisposable
+    public class Controller : IDisposable
     {
         // delegates
         private TeamsAudioDevicePoller _audioDevicePoller;
