@@ -8,10 +8,10 @@
         /// <remarks>
         /// Source: https://stackoverflow.com/a/22078975
         /// </remarks>
-        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, int timeoutMilliseconds)
+        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
         {
             using var timeoutCancellationTokenSource = new CancellationTokenSource();
-            var completedTask = await Task.WhenAny(task, Task.Delay(timeoutMilliseconds, timeoutCancellationTokenSource.Token));
+            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
             if (completedTask == task)
             {
                 // Task completed ok

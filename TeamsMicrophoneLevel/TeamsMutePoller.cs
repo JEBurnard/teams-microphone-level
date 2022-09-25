@@ -1,7 +1,5 @@
 ﻿using BaristaLabs.ChromeDevTools.Runtime.DOM;
 using Newtonsoft.Json;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace TeamsMicrophoneLevel
 {
@@ -15,7 +13,7 @@ namespace TeamsMicrophoneLevel
         private DateTime _lastDevicePoll = DateTime.MinValue;
         private readonly TimeSpan _connectedPollInterval = TimeSpan.FromSeconds(5);
         private readonly Dictionary<string, ChromeSessionState?> _sessions = new();
-        private static readonly int _timeoutMilliseconds = 500;
+        private static readonly TimeSpan _timeout = TimeSpan.FromMilliseconds(3000);
 
 
         /// <summary>
@@ -184,7 +182,7 @@ namespace TeamsMicrophoneLevel
                 session = new SafeChromeSession(debuggerUrl);
 
                 // find the document
-                var document = await session.DOM.GetDocument(new GetDocumentCommand(), token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+                var document = await session.DOM.GetDocument(new GetDocumentCommand(), token).TimeoutAfter(_timeout);
 
                 // determine if the session is a potential call window
                 var isCallSession = await IsCallSession(session, document, token);
@@ -212,7 +210,7 @@ namespace TeamsMicrophoneLevel
                 {
                     NodeId = document.Root.NodeId,
                     Selector = "button#microphone-button",
-                }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+                }, token).TimeoutAfter(_timeout);
 
                 // only interested in pages with the mute button
                 // (but the mute button may be loaded later = do not save so we check again)
@@ -252,12 +250,12 @@ namespace TeamsMicrophoneLevel
             {
                 NodeId = document.Root.NodeId,
                 Selector = "body",
-            }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+            }, token).TimeoutAfter(_timeout);
 
             var attributes = await session.DOM.GetAttributes(new GetAttributesCommand
             {
                 NodeId = body.NodeId,
-            }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+            }, token).TimeoutAfter(_timeout);
 
             var attrributePairs = AttributesToDictionary(attributes.Attributes);
 
@@ -341,7 +339,7 @@ namespace TeamsMicrophoneLevel
                 var attributes = await sessionState.Session.DOM.GetAttributes(new GetAttributesCommand 
                 { 
                     NodeId = sessionState.MuteButtonNodeId,
-                }, token, _timeoutMilliseconds, true).TimeoutAfter(_timeoutMilliseconds);
+                }, token).TimeoutAfter(_timeout);
                 var attrributePairs = AttributesToDictionary(attributes.Attributes);
 
                 // the minimised call window overlay

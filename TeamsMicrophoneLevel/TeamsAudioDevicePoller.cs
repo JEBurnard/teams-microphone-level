@@ -12,7 +12,7 @@ namespace TeamsMicrophoneLevel
         /// <summary>
         /// Poll MM microphone devices to find the (first) that is in use by the teams process.
         /// </summary>
-        public Task Poll()
+        public Task Poll(CancellationToken token)
         {
             string? deviceId = null;
             string? deviceName = null;

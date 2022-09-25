@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 
 namespace TeamsMicrophoneLevel
 {
@@ -175,7 +176,7 @@ namespace TeamsMicrophoneLevel
             {
                 lock (_lockDevice)
                 {
-                    _audioDevicePoller.Poll().Wait();
+                    _audioDevicePoller.Poll(_tokenSource.Token).Wait();
 
                     _levelStreamer.TeamsDeviceId = _audioDevicePoller.CurrentDeviceId;
 
