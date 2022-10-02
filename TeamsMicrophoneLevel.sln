@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamsMicrophoneLevel", "TeamsMicrophoneLevel\TeamsMicrophoneLevel.csproj", "{DB467E32-C8BB-4592-8D21-577D56D6AC2E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeamsMicrophoneLevel", "TeamsMicrophoneLevel\TeamsMicrophoneLevel.csproj", "{DB467E32-C8BB-4592-8D21-577D56D6AC2E}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TeamsMicrophoneLevelInstaller", "TeamsMicrophoneLevelInstaller\TeamsMicrophoneLevelInstaller.vdproj", "{F0F86D0F-8A3E-450C-B6A6-0499F387D852}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{DB467E32-C8BB-4592-8D21-577D56D6AC2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB467E32-C8BB-4592-8D21-577D56D6AC2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB467E32-C8BB-4592-8D21-577D56D6AC2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0F86D0F-8A3E-450C-B6A6-0499F387D852}.Debug|Any CPU.ActiveCfg = Debug
+		{F0F86D0F-8A3E-450C-B6A6-0499F387D852}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
