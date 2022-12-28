@@ -10,6 +10,7 @@
     <Title>Teams Microphone Level</Title>
     <Authors>James Burnard</Authors>
     <PackageProjectUrl></PackageProjectUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
