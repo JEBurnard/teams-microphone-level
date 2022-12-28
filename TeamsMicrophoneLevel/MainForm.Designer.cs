@@ -21,10 +21,9 @@
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.launchTeamsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.launchTeamsWithPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.changeScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label = new System.Windows.Forms.Label();
+            this.statusMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -40,11 +39,10 @@
             this.trayMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.launchTeamsMenuItem,
             this.launchTeamsWithPortMenuItem,
-            this.changeScreenToolStripMenuItem,
             this.statusMenuItem,
             this.exitMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(209, 136);
+            this.trayMenu.Size = new System.Drawing.Size(209, 114);
             // 
             // launchTeamsMenuItem
             // 
@@ -59,20 +57,6 @@
             this.launchTeamsWithPortMenuItem.Size = new System.Drawing.Size(208, 22);
             this.launchTeamsWithPortMenuItem.Text = "Launch Teams (with &port)";
             this.launchTeamsWithPortMenuItem.Click += new System.EventHandler(this.LaunchTeamsWithPortMenuItem_Click);
-            // 
-            // changeScreenToolStripMenuItem
-            // 
-            this.changeScreenToolStripMenuItem.Name = "changeScreenToolStripMenuItem";
-            this.changeScreenToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
-            this.changeScreenToolStripMenuItem.Text = "Choose Scr&een";
-            this.changeScreenToolStripMenuItem.Click += new System.EventHandler(this.ChooseScreenMenuItem_Click);
-            // 
-            // statusMenuItem
-            // 
-            this.statusMenuItem.Name = "statusMenuItem";
-            this.statusMenuItem.Size = new System.Drawing.Size(208, 22);
-            this.statusMenuItem.Text = "&Status";
-            this.statusMenuItem.Click += new System.EventHandler(this.StatusMenuItem_Click);
             // 
             // exitMenuItem
             // 
@@ -89,6 +73,13 @@
             this.label.Size = new System.Drawing.Size(255, 15);
             this.label.TabIndex = 0;
             this.label.Text = "Program entry point - for system tray icon only";
+            // 
+            // statusMenuItem
+            // 
+            this.statusMenuItem.Name = "statusMenuItem";
+            this.statusMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.statusMenuItem.Text = "&Status";
+            this.statusMenuItem.Click += new System.EventHandler(this.StatusMenuItem_Click);
             // 
             // MainForm
             // 
@@ -117,6 +108,5 @@
         private ToolStripMenuItem launchTeamsMenuItem;
         private ToolStripMenuItem launchTeamsWithPortMenuItem;
         private ToolStripMenuItem statusMenuItem;
-        private ToolStripMenuItem changeScreenToolStripMenuItem;
     }
 }
