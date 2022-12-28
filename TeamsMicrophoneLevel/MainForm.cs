@@ -76,6 +76,12 @@ namespace TeamsMicrophoneLevel
             TeamsProcessController.StartTeams(_controller.TeamsDebugPort);
         }
 
+        private void ChooseScreenMenuItem_Click(object sender, EventArgs e)
+        {
+            var portDialog = new ChooseScreenForm(_levelForm);
+            portDialog.ShowDialog();
+        }
+
         private void StatusMenuItem_Click(object sender, EventArgs e)
         {
             if (_statusForm == null || _statusForm.IsDisposed)
