@@ -1,9 +1,11 @@
 using System.Text;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Graphics.Skia;
+using TeamsMicrophoneLevel.Properties;
 using Color = Microsoft.Maui.Graphics.Color;
 using Font = Microsoft.Maui.Graphics.Font;
 using HorizontalAlignment = Microsoft.Maui.Graphics.HorizontalAlignment;
+using Point = System.Drawing.Point;
 
 namespace TeamsMicrophoneLevel
 {
@@ -26,10 +28,40 @@ namespace TeamsMicrophoneLevel
         private const float _fontSize = 10;
         private const int _margin = 3;
 
+        // mouse events for window movement
+        private bool _isMouseDown = false;
+        private Point _dragStartLocation = new(0, 0);
+
 
         public LevelForm()
         {
             InitializeComponent();
+
+            // restore dragged location
+            Location = Settings.Default.Location;
+
+            // restore position if now off screen
+            // (eg a screen has been detached)
+            if (!IsFullyVisible())
+            {
+                Location = new Point(0, 0);
+                Settings.Default.Location = Location;
+                Settings.Default.Save();
+            }
+        }
+
+        private bool IsFullyVisible()
+        {
+            var topLeft = Location;
+            var bottomRight = new Point(Left + Width, Top + Height);
+            foreach (var screen in Screen.AllScreens)
+            {
+                if (screen.Bounds.Contains(topLeft) && screen.Bounds.Contains(bottomRight))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void OnDeviceChanged(string? name)
@@ -163,6 +195,37 @@ namespace TeamsMicrophoneLevel
             if (fontWidth > Width)
             {
                 Width = fontWidth;
+            }
+        }
+
+
+        private void VolumeControl_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _isMouseDown = true;
+                _dragStartLocation = e.Location;
+            }
+        }
+
+        private void VolumeControl_MouseUp(object sender, MouseEventArgs e)
+        {
+            _isMouseDown = false;
+        }
+
+        private void VolumeControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isMouseDown)
+            {
+                // dragging, repoisition
+                var offsetX = e.X - _dragStartLocation.X;
+                var offsetY = e.Y - _dragStartLocation.Y;
+                Location = new Point(Left + offsetX, Top + offsetY);
+
+
+                // save last location
+                Settings.Default.Location = Location;
+                Settings.Default.Save();
             }
         }
     }
