@@ -25,8 +25,9 @@ namespace TeamsMicrophoneLevel
 
         // display text
         private readonly Font _font = new("Consolas");
-        private const float _fontSize = 10;
-        private const int _margin = 3;
+        private readonly float _fontPoints = 10;
+        private readonly float _fontDpi = 96;
+        private const int _margin = 6;
 
         // mouse events for window movement
         private bool _isMouseDown = false;
@@ -182,19 +183,31 @@ namespace TeamsMicrophoneLevel
             canvas.FillColor = GetVolumeColour();
             canvas.FillRectangle(0, 0, width * volumePercentage, height);
 
-            // draw text
+            // size text based on current screen dpi
+            var fontSize = _fontPoints * DeviceDpi / _fontDpi;
             canvas.Font = _font;
-            canvas.FontSize = _fontSize;
+            canvas.FontSize = fontSize;
             canvas.FontColor = Colors.White;
-            var stringSize = canvas.GetStringSize(text, _font, _fontSize);
-            var fontHeight = stringSize.Height;
-            canvas.DrawString(text, _margin, fontHeight + _margin, HorizontalAlignment.Left);
+            var stringSize = canvas.GetStringSize(text, _font, fontSize);
+
+            // draw text
+            canvas.DrawString(text, 
+                _margin, _margin, stringSize.Width, stringSize.Height, 
+                HorizontalAlignment.Left, VerticalAlignment.Center, 
+                TextFlow.OverflowBounds);
 
             // trigger resize (next paint) if the form is to small
             var fontWidth = (int)Math.Ceiling(stringSize.Width);
             if (fontWidth > Width)
             {
                 Width = fontWidth;
+            }
+
+            // resize form to match dpi
+            var expectedHeight = (int)Math.Ceiling(stringSize.Height + (_margin * 2));
+            if (expectedHeight != Height)
+            {
+                Height = expectedHeight;
             }
         }
 
@@ -228,5 +241,6 @@ namespace TeamsMicrophoneLevel
                 Settings.Default.Save();
             }
         }
+
     }
 }
